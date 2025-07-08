@@ -1,19 +1,53 @@
-from fastapi import FastAPI
 import requests
+import time
 
-app = FastAPI()
-DISCORD_API = "https://discord.com/api/v9"
-TOKEN = "SEU_TOKEN_AQUI"
+# This is the terminal version. To test it, you must manually enter your token (handle this information carefully) and the channel ID.
+
+TOKEN = ""  # Your token
+CHANNEL_ID = ""  # Channel ID
+
+headers = {
+    "Authorization": TOKEN,
+    "User-Agent": "Mozilla/5.0",
+}
 
 
-@app.get("/messages/{channel_id}")
-def get_messages(channel_id: str):
-    headers = {"Authorization": f"Bot {TOKEN}"}
-    response = requests.get(
-        f"{DISCORD_API}/channels/{channel_id}/messages?limit=50", headers=headers
-    )
+def get_messages(channel_id, limit=100):
+    url = f"https://discord.com/api/v9/channels/{channel_id}/messages?limit={limit}"
+    res = requests.get(url, headers=headers)
+    if res.status_code == 200:
+        return res.json()
+    else:
+        print(f"Failed to fetch messages: {res.status_code}")
+        return []
 
-    if response.status_code != 200:
-        return {"error": "Falha ao buscar mensagens", "status": response.status_code}
 
-    return response.json()
+def delete_message(channel_id, message_id):
+    url = f"https://discord.com/api/v9/channels/{channel_id}/messages/{message_id}"
+    res = requests.delete(url, headers=headers)
+    return res.status_code == 204
+
+
+def delete_own_messages(channel_id):
+    while True:
+        messages = get_messages(channel_id)
+        if not messages:
+            print("No messages left.")
+            break
+
+        for msg in messages:
+            if msg["author"]["id"] == get_user_id():
+                success = delete_message(channel_id, msg["id"])
+                if success:
+                    print(f"Message {msg['id']} deleted")
+                else:
+                    print(f"Failed to delete message {msg['id']}")
+                time.sleep(1)  # prevent rate limit
+
+
+def get_user_id():
+    res = requests.get("https://discord.com/api/v9/users/@me", headers=headers)
+    return res.json()["id"]
+
+
+delete_own_messages(CHANNEL_ID)
