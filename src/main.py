@@ -29,20 +29,31 @@ def delete_message(channel_id, message_id):
 
 
 def delete_own_messages(channel_id):
+    user_id = get_user_id()
+
+    if not user_id:
+        print("Error getting user ID")
+        return
+
     while True:
         messages = get_messages(channel_id)
         if not messages:
-            print("No messages left.")
+            print("No messages found")
             break
 
-        for msg in messages:
-            if msg["author"]["id"] == get_user_id():
-                success = delete_message(channel_id, msg["id"])
-                if success:
-                    print(f"Message {msg['id']} deleted")
-                else:
-                    print(f"Failed to delete message {msg['id']}")
-                time.sleep(1)  # prevent rate limit
+        own_messages = [msg for msg in messages if msg["author"]["id"] == user_id]
+
+        if not own_messages:
+            print("No messages sent by you remaining")
+            break
+
+        for msg in own_messages:
+            success = delete_message(channel_id, msg["id"])
+            if success:
+                print(f"Message {msg['id']} deleted")
+            else:
+                print(f"Failed to delete message {msg['id']}")
+            time.sleep(1)  # prevent rate limit
 
 
 def get_user_id():
