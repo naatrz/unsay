@@ -41,7 +41,11 @@ def delete_own_messages(channel_id):
             print("No messages found")
             break
 
-        own_messages = [msg for msg in messages if msg["author"]["id"] == user_id]
+        own_messages = [
+            msg
+            for msg in messages
+            if msg["author"]["id"] == user_id and msg["type"] in [0, 6]
+        ]
 
         if not own_messages:
             print("No messages sent by you remaining")
