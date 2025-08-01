@@ -14,7 +14,7 @@ The goal is to make it easier to delete your own messages or posts across differ
 
 ## 🔧 Features
 
-At the current stage, Unsay works with Discord only, and it runs via terminal commands.
+At the current stage, Unsay works with Discord only, and it runs **via terminal**.
 You can use it to delete your own messages from servers or direct messages, with no time limits — using your own user token.
 
 > [!NOTE]
